@@ -1,5 +1,7 @@
 """
 Branch Model - Represents a branch in the organization
+
+Connects with ATM and Technician Models
 """
 
 
@@ -14,12 +16,13 @@ from sqlalchemy import Integer, String
 #ORM = Object Relational Mapper
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import base
+from .base import Base
 
 if TYPE_CHECKING:
-    #put forigen key models here
+    from atm import ATM
+    from technicians import Technician
 
-class Branch(base):
+class Branch(Base):
     #Table name for model
     __tablename__ = "branches"
 
@@ -30,9 +33,14 @@ class Branch(base):
     capacity: Mapped[int] = mapped_column(Integer)
     supervisor_id: Mapped[int] = mapped_column(Integer)
 
-    #Create relationships (ie bc ATM has branch_Id it needs to be related to Branch, etc)
-    #need to spend time understanding this i still dont really get it
-    #copying from robopulse this would be ATM and Technicians both bc of branchid (id here)
+    #Relationships
+    #No Outbound Relationships
+
+    #Inbound Relationships are ATMs and Technicians
+    #For every branch, there can be multiple ATMs and Technicians
+    #when Inbound Relationship if the incoming is the many use lists
+    atms: Mapped[list["ATM"]] = relationship(back_populates="branch")
+    technicians: Mapped[list["Technician"]] = relationship(back_populates="branch")
 
     def __repr__(self) -> str:
         return f"Branch(id={self.id}, name={self.name!r}, location_region={self.location_region!r})"

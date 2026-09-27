@@ -10,7 +10,7 @@ from enum import Enum
 
 class ATMStatus(str,Enum):
     OPERATIONAL = "Operational"
-    IN-TRANSPORT = "In-Transport"
+    IN_TRANSPORT = "In-Transport"
     MAINTENANCE = "Maintenance"
     OFFLINE = "Offline"
 
@@ -27,5 +27,5 @@ class ServiceStatus(str,Enum):
 
 class UserRole(str,Enum):
     OPERATIONS_ADMIN = "Operations Admin" #Everything
-    FIELD_TECHNICIAN = "Field Technician" #Status cahnges and upload files
+    FIELD_TECHNICIAN = "Field Technician" #Status changes and upload files
     AUDITOR = "Auditor" #Read only
