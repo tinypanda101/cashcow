@@ -31,3 +31,18 @@ class ATMRead(ATMBase):
 
     #This allows the model to be instantiated from ORM attributes
     model_config = ConfigDict(from_attributes=True)
+
+class ATMUpdate(BaseModel):
+    """
+    Shape of the Request Body for Updating an ATM
+    Builds off of ATMBase (ie includes all fields)
+    """
+    id: int | None = None
+    serial_number: str | None = Field(default=None, min_length=1, max_length=50)
+    model: str | None = Field(default=None, min_length=1, max_length=100)
+    cash_level: Decimal| None = Field(default=None, ge=0, le=100)
+    branch_id: int | None = None
+    status: ATMStatus | None = None # Default status for a new ATM
+
+    #This allows the model to be instantiated from ORM attributes
+    model_config = ConfigDict(from_attributes=True)

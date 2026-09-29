@@ -10,8 +10,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
-from app.routers import auth
+from app.routers import auth, atm, branch, technicians,servicecall, diagnosticreport
 from app.config import settings
+
+
 
 app = FastAPI(
     title = "CashCow Command Center",
@@ -32,9 +34,13 @@ app.add_middleware(
 
 #this is where routers go
 app.include_router(auth.router)
+app.include_router(atm.router)
+app.include_router(branch.router)
+app.include_router(technicians.router)
+app.include_router(servicecall.router)
+app.include_router(diagnosticreport.router)
 
-
-@app.get("/health")
+@app.get("/health", tags=["health"])
 def health():
     return {"status": "ok"}
 

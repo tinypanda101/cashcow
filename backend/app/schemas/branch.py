@@ -31,3 +31,16 @@ class BranchRead(BranchBase):
 
     #This allows the model to be instantiated from ORM attributes
     model_config = ConfigDict(from_attributes=True)
+
+class BranchUpdate(BaseModel):
+    """
+    Shape of the Request Body for Updating a Branch
+    Builds off of BranchBase (ie includes all fields)
+    """
+    id: int | None = None
+    name: str | None= Field(default = None, min_length = 2, max_length = 50)
+    location_region: str | None = Field(default = None, min_length = 2, max_length = 100)
+    capacity: int | None = Field(default = None, ge = 0)
+    supervisor_id: int | None = None
+    #This allows the model to be instantiated from ORM attributes
+    model_config = ConfigDict(from_attributes=True)

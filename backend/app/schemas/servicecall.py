@@ -17,8 +17,14 @@ class ServiceCallBase(BaseModel):
 class ServiceCallCreate(ServiceCallBase):
     pass
 
-class ServiceCallUpdate(ServiceCallBase):
-    pass
+class ServiceCallUpdate(BaseModel):
+    id: int | None = None
+    title: str | None= Field(default=None, min_length = 2, max_length = 100)
+    priority: ServicePriority | None= None
+    status: ServiceStatus |None= None
+    atm_id: int | None
+    technician_id: int | None
+    model_config = ConfigDict(from_attributes=True)
 
 class ServiceCallRead(ServiceCallBase):
     id: int

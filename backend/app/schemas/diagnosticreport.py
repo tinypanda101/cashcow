@@ -2,7 +2,7 @@
 Diagnostic Report Schema
 """
 
-import datetime
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -16,5 +16,12 @@ class DiagnosticReportCreate(DiagnosticReportBase):
 
 class DiagnosticReportRead(DiagnosticReportBase):
     id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+class DiagnosticReportUpdate(BaseModel):
+    id: int | None = None
+    file_url: str | None = None
+    notes: str | None = None
 
     model_config = ConfigDict(from_attributes=True)

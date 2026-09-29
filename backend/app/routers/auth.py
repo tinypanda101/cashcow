@@ -27,7 +27,7 @@ async def login(
     user = result.scalar_one_or_none()
 
     #Check if password is correct or not
-    if user is None or not verify_password(form_data.password, user.hashed_password):
+    if user is None or not verify_password(form_data.password, user.hash_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -59,7 +59,7 @@ async def register_user(
     #Create new user
     user = User(
         username =  payload.username,
-        hashed_password = has_password(payload.password),
+        hash_password = hash_password(payload.password),
         role = payload.role
     )
 
