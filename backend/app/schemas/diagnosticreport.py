@@ -7,6 +7,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 class DiagnosticReportBase(BaseModel):
+    service_call_id : int
     file_url: str
     notes: str
     timestamp: datetime
@@ -20,7 +21,7 @@ class DiagnosticReportRead(DiagnosticReportBase):
     model_config = ConfigDict(from_attributes=True)
 
 class DiagnosticReportUpdate(BaseModel):
-    id: int | None = None
+    service_call_id : int | None = None
     file_url: str | None = None
     notes: str | None = None
 

@@ -56,7 +56,7 @@ async def create_technician(
 
 
 #Update tech
-@router.post("/{technician_id}", response_model=TechnicianRead)
+@router.put("/{technician_id}", response_model=TechnicianRead)
 async def update_technician(
     technician_id: int,
     technician_data: TechnicianUpdate,

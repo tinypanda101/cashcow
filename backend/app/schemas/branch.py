@@ -37,10 +37,37 @@ class BranchUpdate(BaseModel):
     Shape of the Request Body for Updating a Branch
     Builds off of BranchBase (ie includes all fields)
     """
-    id: int | None = None
     name: str | None= Field(default = None, min_length = 2, max_length = 50)
     location_region: str | None = Field(default = None, min_length = 2, max_length = 100)
     capacity: int | None = Field(default = None, ge = 0)
     supervisor_id: int | None = None
     #This allows the model to be instantiated from ORM attributes
     model_config = ConfigDict(from_attributes=True)
+
+
+class MaintenanceFlag(BaseModel):
+    """
+    Shape of the Response Body for Reading Maintenance Flags for Branches
+    """
+    branch_id: int
+    branch_name: str
+    total_atms: int
+    maintenance_count: int
+    maintenance_percentage: float
+
+
+class TechnicianActiveCalls(BaseModel):
+    """
+    Shape of the Response Body for Reading Active Service Calls for Technicians
+    """
+    technician_id: int
+    technician_name : str
+    active_mission_count: int
+
+class SupervisorCheck(BaseModel):
+    """
+    Shape of the Response Body for Checking Regional Supervisor's Technicians
+    """
+    supervisor_id: int
+    technician_count: int
+    technician: list[TechnicianActiveCalls]

@@ -12,7 +12,6 @@ class TechnicianCreate(TechnicianBase):
     pass
 
 class TechnicianUpdate(BaseModel):
-    id: int | None = None
     name: str | None = Field(default=None, min_length=2, max_length=100)
     branch_id: int | None = None
 

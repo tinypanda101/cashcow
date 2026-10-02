@@ -109,3 +109,4 @@ async def delete_atm(
     await db.delete(statement)
     await db.commit()
     return None
+
