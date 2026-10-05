@@ -98,20 +98,10 @@ async def update_service_call_status(
         raise HTTPException(status.HTTP_404_NOT_FOUND,
                             f"ServiceCall not found with the ID {service_call_id}")
 
-    # Technicians may only change calls assigned to them
-    if current_user.role == UserRole.FIELD_TECHNICIAN:
-        tech = await db.scalar(
-            select(Technician).where(Technician.user_id == current_user.id)
-        )
-        if tech is None or service_call.technician_id != tech.id:
-            raise HTTPException(status.HTTP_403_FORBIDDEN,
-                                "You can only update service calls assigned to you")
-
     service_call.status = payload.status
     await db.commit()
     await db.refresh(service_call)
     return service_call
-
 
 
 #Get by id

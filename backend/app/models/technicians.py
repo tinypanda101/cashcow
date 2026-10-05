@@ -26,7 +26,7 @@ class Technician(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     branch_id: Mapped[int] = mapped_column(Integer, ForeignKey("branches.id")) #foreign key
-
+    
 
     # Relationships
     #Outbound relationship is branch, for every branch, there can be multiple technicians
