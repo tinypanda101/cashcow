@@ -1,0 +1,11 @@
+fastapi
+sqlalchemy[asyncio]
+asyncpg
+pydantic
+pydantic-core
+bcrypt
+pyjwt
+mangum
+python-multipart
+pydantic-settings
+boto3
