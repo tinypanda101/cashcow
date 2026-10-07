@@ -4,13 +4,12 @@ fastapi dev app/main.py
 """
 
 import os
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
-from app.routers import auth, atm, branch, technicians,servicecall, diagnosticreport
+from app.routers import auth, atm, branch, technicians,servicecall, diagnosticreport, health
 from app.config import settings
 
 
@@ -39,10 +38,7 @@ app.include_router(branch.router)
 app.include_router(technicians.router)
 app.include_router(servicecall.router)
 app.include_router(diagnosticreport.router)
-
-@app.get("/health", tags=["health"])
-def health():
-    return {"status": "ok"}
+app.include_router(health.router)
 
 ##Endpoint to check the version number
 @app.get("/version", tags=["health"])
