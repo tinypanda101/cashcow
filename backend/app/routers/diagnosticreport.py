@@ -89,3 +89,5 @@ async def delete_DiagnosticReport(
     await db.delete(diagnosticreport)
     await db.commit()
     return None
+
+

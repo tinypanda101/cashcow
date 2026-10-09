@@ -14,9 +14,10 @@ from .servicecall import ServiceCall
 from .technicians import Technician
 from .user import User
 from .base import Base
+from .refresh_token import RefreshToken
 
 __all__ = [
     "Base",
     "ServiceStatus", "ServicePriority", "UserRole", "ATMStatus",
-    "ATM", "Branch", "DiagnosticReport", "ServiceCall", "Technician", "User"
+    "ATM", "Branch", "DiagnosticReport", "ServiceCall", "Technician", "User", "RefreshToken"
 ]

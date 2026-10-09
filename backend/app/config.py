@@ -4,7 +4,7 @@ This will read real env variables from a .env file
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from pydantic import Field
 
 
 class Settings(BaseSettings):
@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     frontend_origin: str = "http://localhost:5173"
 
     seed_password: str | None = None
+
+    access_token_expire_minutes: int = 15
+    refresh_token_expire_days: int = 7
+
 
     #Tells pydantic-settings to actually read from backend/.env and fill these fields from it
     model_config = SettingsConfigDict(env_file=".env")

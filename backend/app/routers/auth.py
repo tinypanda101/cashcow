@@ -13,8 +13,23 @@ from app.models import User, UserRole
 from app.schemas.user import Token, UserCreate, UserRead, UserUpdate
 from app.security import create_access_token, hash_password, verify_password
 
+import uuid
+from datetime import datetime, timedelta, timezone
+ 
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+ 
+from app.config import settings
+from app.models import RefreshToken
+from app.schemas.user import RefreshRequest, TokenPair
+from app.security import generate_refresh_token, hash_refresh_token
+
 #step 1: set up the router for endpoints
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+invalid_refresh_token = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
 #Step 2: Define login endpoint which takes a user and a pass, verify creds then return a JWT token
 @router.post("/token", response_model=Token)
@@ -152,3 +167,70 @@ async def delete_user(
     await db.delete(user)
     await db.commit()
 
+#Creates a new access token + refresh token and saves the refresh token's hash.
+#Login and refresh both use this, so the access token always has the same claims.
+async def create_token_pair(db: AsyncSession, user: User, chain_id: uuid.UUID) -> dict:
+    refresh_token = generate_refresh_token()
+    now = datetime.now(timezone.utc)
+    db.add(RefreshToken(
+        user_id=user.id,
+        token_hash=hash_refresh_token(refresh_token),
+        chain_id=chain_id,
+        issued_at=now,
+        expires_at=now + timedelta(days=settings.refresh_token_expire_days),
+    ))
+    await db.commit()
+ 
+    #Make this payload match what your login already puts in the token
+    access_token = create_access_token({"sub": user.username, "role": user.role})
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+ 
+ 
+@router.post("/token", response_model=TokenPair)
+async def login(form: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    user = (await db.execute(select(User).where(User.username == form.username))).scalar_one_or_none()
+    if user is None or not verify_password(form.password, user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
+    #Each login starts a new chain
+    return await create_token_pair(db, user, uuid.uuid4())
+ 
+ 
+#No get_current_user here on purpose: the access token is expected to be expired
+@router.post("/refresh", response_model=TokenPair)
+async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
+    #with_for_update() locks the row so two requests can't use the same token at the same time
+    result = await db.execute(
+        select(RefreshToken)
+        .where(RefreshToken.token_hash == hash_refresh_token(body.refresh_token))
+        .with_for_update()
+    )
+    token = result.scalar_one_or_none()
+ 
+    #Token doesn't exist
+    if token is None:
+        raise invalid_refresh_token
+ 
+    #Token was already used: assume it was stolen and revoke every token from that login
+    if token.revoked:
+        await db.execute(update(RefreshToken).where(RefreshToken.chain_id == token.chain_id).values(revoked=True))
+        await db.commit()
+        raise invalid_refresh_token
+ 
+    #Token is expired (replace() is for SQLite in tests, which drops the timezone)
+    if token.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise invalid_refresh_token
+ 
+    #Token is valid: mark it used and give out a new pair in the same chain
+    token.revoked = True
+    user = await db.get(User, token.user_id)
+    return await create_token_pair(db, user, token.chain_id)
+ 
+ 
+#Logout revokes every token from this login. Doesn't need an access token.
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(RefreshToken).where(RefreshToken.token_hash == hash_refresh_token(body.refresh_token)))
+    token = result.scalar_one_or_none()
+    if token is not None:
+        await db.execute(update(RefreshToken).where(RefreshToken.chain_id == token.chain_id).values(revoked=True))
+        await db.commit()
